@@ -348,7 +348,7 @@ def single_plot(input_data,elements,robust,range,cmap,interpolation_method):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-m', '--mode',         nargs='?', help='Modes: \n \t w: write yaml file with the results \n \t r: read an existing yaml file',
+parser.add_argument('-m', '--mode',         nargs='?', help=f'Modes: \n \t w: write yaml file with the results \n \t r: read an existing yaml file',
                     choices={"r", "w"},             default='w')
 parser.add_argument('-p', '--plot_mode', nargs='?', help='Plotting mode, if m only one .pdf will be generated',
                     choices={'m','s'}, default='m')
