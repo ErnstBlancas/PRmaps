@@ -46,7 +46,7 @@ With the single plot mode `-p s` a .pdf file is produced for each element in the
 ```
 python main.py -m r -p s --output_yaml BiOCuS_results --heatmap_xy 15 15 --robust True --cmap Blues --interpolation_method bicubic
 ```
-the command generates 5 .pdf files with the name of the compound and the element (for example `BiOCuS_Cu.pdf`) and one file with the total distribution (`BiOCuS_Total.pdf`).
+the command generates 5 .pdf files with the name of the compound (POSCAR elements in order) and the element (for example `CuBiSO_Cu.pdf`) and one file with the total distribution (`CuBiSO_Total.pdf`).
 
 ### No plot mode
 With the no plot mode `-p n` the data used for the plots is saved as `raw_data`. Only the heatmap size and the input file are requested:
