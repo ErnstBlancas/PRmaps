@@ -38,7 +38,7 @@ python main.py -m r -p m --output_yaml BiOCuS_results --heatmap_xy 15 15 --robus
 creates `BiOCuSe_multiplot.pdf` with a [15,15] heatmap, with the range fix to the Total maximum and minimum and using the bicubic interpolation method. To obtain the same figure but with a different range (0 to 7000):
 
 ```
-python main.py -m r -p m --output_yaml BiOCuSe_results --heatmap_xy 15 15 --robust False --heatmap_range 0 7000 --cmap Blues --interpolation_method bicubic --multiplot_name BiOCuS_multiplot
+python main.py -m r -p m --output_yaml BiOCuS_results --heatmap_xy 15 15 --robust False --heatmap_range 0 7000 --cmap Blues --interpolation_method bicubic --multiplot_name BiOCuS_multiplot
 ```
 
 ### Singleplot mode
