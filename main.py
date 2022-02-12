@@ -397,3 +397,6 @@ if args.plot_mode=='m':
                 range=args.heatmap_range,cmap=args.cmap, interpolation_method=args.interpolation_method)
 if args.plot_mode=='n':
     print('No plot mode')
+    data.to_csv('raw_data',sep='\t')
+    
+    
