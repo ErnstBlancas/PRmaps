@@ -379,24 +379,22 @@ if args.mode=='w':
     mesh_data,atom_types,mass=read_raw_data(input_data='mesh.yaml')
     match_qpoints=find_qpoints(mesh_data)
     write_results(data=mesh_data, atom_types=atom_types, mass=mass,match_qp=match_qpoints,output_file=args.output_yaml)
+if args.mode=='r':
+    data,element_list=convert_to_dataframe(input_file=args.output_yaml)
+    data=clean_data(data)
+    gridx,gridy =create_mesh(data,grid_size=args.heatmap_xy)
 
-data,element_list=convert_to_dataframe(input_file=args.output_yaml)
-data=clean_data(data)
-gridx,gridy =create_mesh(data,grid_size=args.heatmap_xy)
+    polygons=create_polygons(gridx,gridy)
+    data=assign_polygons(data,polygons)
 
-polygons=create_polygons(gridx,gridy)
-data=assign_polygons(data,polygons)
-
-if args.plot_mode=='s':
-    print('Single plot mode')
-    single_plot(data,elements=element_list,robust=args.robust,range=args.heatmap_range,cmap=args.cmap,
-                interpolation_method=args.interpolation_method)
-if args.plot_mode=='m':
-    print('Multiplot mode')
-    multi_plot(data,elements=element_list,output=args.multiplot_name,robust=args.robust,
-                range=args.heatmap_range,cmap=args.cmap, interpolation_method=args.interpolation_method)
-if args.plot_mode=='n':
-    print('No plot mode')
-    data.to_csv('raw_data',sep='\t')
-    
-    
+    if args.plot_mode=='s':
+        print('Single plot mode')
+        single_plot(data,elements=element_list,robust=args.robust,range=args.heatmap_range,cmap=args.cmap,
+                    interpolation_method=args.interpolation_method)
+    if args.plot_mode=='m':
+        print('Multiplot mode')
+        multi_plot(data,elements=element_list,output=args.multiplot_name,robust=args.robust,
+                    range=args.heatmap_range,cmap=args.cmap, interpolation_method=args.interpolation_method)
+    if args.plot_mode=='n':
+        print('No plot mode')
+        data.to_csv('raw_data',sep='\t')
