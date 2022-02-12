@@ -12,7 +12,7 @@ import warnings
 def generate_yaml(supercell_size, mesh_grid):
     #INPUT READ
     data=phonopy.load(supercell_matrix=supercell_size,
-                    supercell_filename='SPOSCAR',
+                    unitcell_filename='POSCAR',
                     primitive_matrix='auto',
                     symmetrize_fc=True,
                     force_constants_filename='FORCE_CONSTANTS')
