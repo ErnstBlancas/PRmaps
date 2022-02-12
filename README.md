@@ -44,14 +44,14 @@ python main.py -m r -p m --output_yaml BiOCuS_results --heatmap_xy 15 15 --robus
 ### Singleplot mode
 With the single plot mode `-p s` a .pdf file is produced for each element in the compound and with the total distribution. All the previous parameters work except `--multiplot_name`. For example:
 ```
-python main.py -m r -p s --output_yaml BiOCuSe_results --heatmap_xy 15 15 --robust True --cmap Blues --interpolation_method bicubic
+python main.py -m r -p s --output_yaml BiOCuS_results --heatmap_xy 15 15 --robust True --cmap Blues --interpolation_method bicubic
 ```
-the command generates 5 .pdf files with the name of the compound and the element (for example `BiOCuSe_Cu.pdf`) and one file with the total distribution (`BiOCuSe_Total.pdf`).
+the command generates 5 .pdf files with the name of the compound and the element (for example `BiOCuS_Cu.pdf`) and one file with the total distribution (`BiOCuS_Total.pdf`).
 
 ### No plot mode
 With the no plot mode `-p n` the data used for the plots is saved as `raw_data`. Only the heatmap size and the input file are requested:
 ```
-python main.py -m r -p n --output_yaml BiOCuSe_results --heatmap_xy 15 15
+python main.py -m r -p n --output_yaml BiOCuS_results --heatmap_xy 15 15
 ```
 explicar datos que se produce?
 
