@@ -350,13 +350,13 @@ def single_plot(input_data,elements,robust,range,cmap,interpolation_method):
 parser = argparse.ArgumentParser()
 parser.add_argument('-m', '--mode',         nargs='?', help=f'Modes: \n \t w: write yaml file with the results \n \t r: read an existing yaml file',
                     choices={"r", "w"},             default='w')
-parser.add_argument('-p', '--plot_mode', nargs='?', help='Plotting mode, if m only one .pdf will be generated',
-                    choices={'m','s'}, default='m')
+parser.add_argument('-p', '--plot_mode', nargs='?', help='Plotting mode, m for one single plot, s for one plot for each element and n for no plot',
+                    choices={'m','s', 'n'}, default='m')
 parser.add_argument('--supercell_size',     nargs='+',      help='Supercell size, default size is [1, 1, 1  ]',
                     type=int    ,required=False,    default=[1,1,1])
 parser.add_argument('--mesh_grid',          nargs='+',      help='Phonopy mesh grid size, default mesh is [1, 1, 1  ]',
                     type=int    ,required=False,    default=[1,1,1])
-parser.add_argument('--output_yaml',        nargs='?',        help='Output with the scattering rates, partitipation rates and atomic partitipation rates',
+parser.add_argument('--output_yaml',        nargs='?',        help='Output file name with the scattering rates, partitipation rates and atomic partitipation rates',
                     type=str    ,required=False,     default='results')
 parser.add_argument('--multiplot_name',        nargs='?',        help='Multiplot .pdf file name',
                     type=str    ,required=False,     default='multiplot')
@@ -386,7 +386,7 @@ gridx,gridy =create_mesh(data,grid_size=args.heatmap_xy)
 
 polygons=create_polygons(gridx,gridy)
 data=assign_polygons(data,polygons)
-data.to_csv('culo', sep='\t')
+
 if args.plot_mode=='s':
     print('Single plot mode')
     single_plot(data,elements=element_list,robust=args.robust,range=args.heatmap_range,cmap=args.cmap,
@@ -395,3 +395,5 @@ if args.plot_mode=='m':
     print('Multiplot mode')
     multi_plot(data,elements=element_list,output=args.multiplot_name,robust=args.robust,
                 range=args.heatmap_range,cmap=args.cmap, interpolation_method=args.interpolation_method)
+if args.plot_mode=='n':
+    print('No plot mode')
