@@ -14,7 +14,7 @@ The eigenvectors generated with Phonopy are used to obtain the participation rat
 
 For example to create a [5, 5, 3] supercell with a [12, 12, 12] mesh grid, and save the results in `BiOCuSe_results.yaml` the code is:
 ```
-python main.py -m w --supercell_size 5 5 3 --mesh_grid 12 12 12 --output_yaml BiOCuSe_results
+python main.py -m w --supercell_size 5 5 3 --mesh_grid 12 12 12 --output_yaml BiOCuS_results
 ```
 
 
@@ -33,25 +33,25 @@ The .yaml file with the results could be read with the mode read `m -r`. With th
 ### Multiplot mode
 With the multiplot mode `-p m` one single .pdf file with all the heatmaps. The name of the file could be changed with `--multiplot_name name`. For example:
 ```
-python main.py -m r -p m --output_yaml BiOCuSe_results --heatmap_xy 15 15 --robust True --cmap Blues --interpolation_method bicubic --multiplot_name BiOCuSe_multiplot
+python main.py -m r -p m --output_yaml BiOCuS_results --heatmap_xy 15 15 --robust True --cmap Blues --interpolation_method bicubic --multiplot_name BiOCuSe_multiplot
 ```
 creates `BiOCuSe_multiplot.pdf` with a [15,15] heatmap, with the range fix to the Total maximum and minimum and using the bicubic interpolation method. To obtain the same figure but with a different range (0 to 7000):
 
 ```
-python main.py -m r -p m --output_yaml BiOCuSe_results --heatmap_xy 15 15 --robust False --heatmap_range 0 7000 --cmap Blues --interpolation_method bicubic --multiplot_name BiOCuSe_multiplot
+python main.py -m r -p m --output_yaml BiOCuS_results --heatmap_xy 15 15 --robust False --heatmap_range 0 7000 --cmap Blues --interpolation_method bicubic --multiplot_name BiOCuS_multiplot
 ```
 
 ### Singleplot mode
 With the single plot mode `-p s` a .pdf file is produced for each element in the compound and with the total distribution. All the previous parameters work except `--multiplot_name`. For example:
 ```
-python main.py -m r -p s --output_yaml BiOCuSe_results --heatmap_xy 15 15 --robust True --cmap Blues --interpolation_method bicubic
+python main.py -m r -p s --output_yaml BiOCuS_results --heatmap_xy 15 15 --robust True --cmap Blues --interpolation_method bicubic
 ```
-the command generates 5 .pdf files with the name of the compound and the element (for example `BiOCuSe_Cu.pdf`) and one file with the total distribution (`BiOCuSe_Total.pdf`).
+the command generates 5 .pdf files with the name of the compound (POSCAR elements in order) and the element (for example `CuBiSO_Cu.pdf`) and one file with the total distribution (`CuBiSO_Total.pdf`).
 
 ### No plot mode
 With the no plot mode `-p n` the data used for the plots is saved as `raw_data`. Only the heatmap size and the input file are requested:
 ```
-python main.py -m r -p n --output_yaml BiOCuSe_results --heatmap_xy 15 15
+python main.py -m r -p n --output_yaml BiOCuS_results --heatmap_xy 15 15
 ```
 explicar datos que se produce?
 
