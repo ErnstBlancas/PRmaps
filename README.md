@@ -2,13 +2,13 @@
 ## Input files
 The input files are:
   - POSCAR with the cell of the compound
+  - SPOSCAR with the supercell structure
   - FORCE_CONSTANTS with the [Phonopy FORCE_CONSTANTS format](https://phonopy.github.io/phonopy/input-files.html#format-of-force-constants) (.hdf5 format is not acepted)
   - BTE.qpoints
   - BTE.w_final
  
 ## Creating output file with the results
 The eigenvectors generated with Phonopy are used to obtain the participation rates and the atomic participation rates. To generate this file the wrapper has the mode write `-m w`. 
- - The size of the supercell is specified with `--supercell_size x y z`  
  - The density of the grid is specified with `--mesh_grid x y z` and is saved as `mesh.yaml`. The mesh grid must be equal or smaller than the BTE mesh use
  - The output file name could be set with `--output_yaml name`
 
