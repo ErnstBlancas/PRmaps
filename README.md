@@ -25,7 +25,7 @@ The .yaml file with the results could be read with the mode read `m -r`. With th
  - The number of bins used to divide the space and calculate the heatmap is defined with `--heatmap_xy x y`.
  - The range of the colorbar could be set with:
    - `--robust True` the range is fixed according to the maximum and the minimum
-   - `--robust False` in this case the range must be specified with `--heatmap_range min max`
+   - `--robust False` in this case the maximum must be specified with `--heatmap_max max`
  - The interpolation method use for smooth the heatmap could be specified with `--interpolation_method method_name`. The methods that could be use are from [Matplotlib `.inshow(interpolation)`](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html)
  - The colormap used in the plots could be changed with `--cmap name`. The colour schemes available are from [Matplotlib](https://matplotlib.org/stable/tutorials/colors/colormaps.html)
 
@@ -38,7 +38,7 @@ python main.py -m r -p m --output_yaml BiOCuS_results --heatmap_xy 15 15 --robus
 creates `BiOCuS_multiplot.pdf` with a [15,15] heatmap, with the range fix to the Total maximum and minimum and using the bicubic interpolation method. To obtain the same figure but with a different range (0 to 7000):
 
 ```
-python main.py -m r -p m --output_yaml BiOCuS_results --heatmap_xy 15 15 --robust False --heatmap_range 0 7000 --cmap Blues --interpolation_method bicubic --multiplot_name BiOCuS_multiplot
+python main.py -m r -p m --output_yaml BiOCuS_results --heatmap_xy 15 15 --robust False --heatmap_max 7000 --cmap Blues --interpolation_method bicubic --multiplot_name BiOCuS_multiplot
 ```
 
 ### Singleplot mode
