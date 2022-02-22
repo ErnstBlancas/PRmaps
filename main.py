@@ -9,9 +9,16 @@ import pandas as pd
 import argparse
 import warnings
 
-def generate_yaml(supercell_size, mesh_grid):
+def generate_yaml(mesh_grid):
     #INPUT READ
-    data=phonopy.load(supercell_matrix=supercell_size,
+    from phonopy.interface.calculator import read_crystal_structure
+    POSCAR,b = read_crystal_structure('POSCAR',interface_mode='vasp')
+    POSCAR = POSCAR.get_cell()
+    SPOSCAR,b = read_crystal_structure('SPOSCAR',interface_mode='vasp')
+    SPOSCAR = SPOSCAR.get_cell()
+    supercell = [round(SPOSCAR[i][i]/POSCAR[i][i]) for i in range(3)]
+    print(f'The supercell size is {supercell}' )
+    data=phonopy.load(supercell_matrix=supercell,
                     unitcell_filename='POSCAR',
                     primitive_matrix='auto',
                     symmetrize_fc=True,
@@ -144,13 +151,13 @@ def write_results(data,atom_types,mass,match_qp,output_file):
             for k in range(len(atom_types)):
                 lines.append('    - # %s:' % str(atom_types[k]))
                 lines.append('        %15.10f'% res[1][k])
-    with open('{}.yaml'.format(output_file), 'w') as output:
+    with open('{}'.format(output_file), 'w') as output:
         output.write("\n".join(lines))
         output.close()
 
 def convert_to_dataframe(input_file):
     print('Creating DataFrame')
-    with open('{}.yaml'.format(input_file)) as output_data:
+    with open(f'{input_file}') as output_data:
         read_data=load(output_data,Loader=Loader)
     nqpoints=len(read_data['phonon'])
     vmodes=len(read_data['phonon'][0]['band'])
@@ -177,25 +184,26 @@ def convert_to_dataframe(input_file):
                        'Weight': Weight})
     for i in element_list:
         data[i]=elements_pr[i]
+    data=data.rename({'Scr':'Total'}, axis=1)
     return data, element_list
 
 def clean_data(data):
-    data=data.sort_values(by=['Scr'],na_position='last',ascending=False)
-    mean=data['Scr'].mean()
+    data=data.sort_values(by=['Total'],na_position='last',ascending=False)
+    mean=data['Total'].mean()
     for i in range(len(data)):
-        comparation=data.iloc[i]['Scr']-mean
+        comparation=data.iloc[i]['Total']-mean
         if comparation>=10000:
             data=data.iloc[1:,:]
         else:
             break
     #El cutoff puede ser una variable
-    data['Scr']=data['Scr'].where(data['Scr']>1e-4)
-    data.dropna(subset = ["Scr"], inplace=True)
+    data['Total']=data['Total'].where(data['Total']>1e-4)
+    data.dropna(subset = ["Total"], inplace=True)
     data.dropna(subset = ["Freq"], inplace=True)
     return data
 
 def create_mesh(data,grid_size):
-    gridx,gridy=np.meshgrid(np.linspace(data['Freq'].min(), data['Freq'].max(), grid_size[0]),np.logspace(np.log10(data['Scr'].min()), np.log10(data['Scr'].max()), grid_size[1]))
+    gridx,gridy=np.meshgrid(np.linspace(data['Freq'].min(), data['Freq'].max(), grid_size[0]),np.logspace(np.log10(data['Total'].min()), np.log10(data['Total'].max()), grid_size[1]))
     return gridx,gridy
 
 def create_polygons(grid_x,grid_y):
@@ -219,7 +227,7 @@ def assign_polygons(data,polygons):
     polygon_order=[]
     checked=[]
     for point in range(len(data)):
-        p=data['Freq'].iloc[point],data['Scr'].iloc[point]
+        p=data['Freq'].iloc[point],data['Total'].iloc[point]
         for polygon in range(len(polygons)):
             path = mpath.Path(polygons[polygon],closed=False)
             if path.contains_point(p,radius=1e-9)==True:
@@ -236,7 +244,7 @@ def convert_to_heatmap(data,column,shape,polygon_number):
     ocuppied_polygons=data['Polygon'].unique()
     all_polygons=[i for i in range(polygon_number)]
     heatmap_data=[]
-    if column!='Scr':
+    if column!='Total':
         for poly in all_polygons:
             scr_weight=0
             if poly in ocuppied_polygons:
@@ -245,7 +253,7 @@ def convert_to_heatmap(data,column,shape,polygon_number):
                 heatmap_data.append(scr_weight)
             else:
                 heatmap_data.append(0)
-    if column=='Scr':
+    if column=='Total':
         for poly in all_polygons:
             if poly in ocuppied_polygons:
                 heatmap_data.append(data['Weight'].loc[data['Polygon']==poly].sum())
@@ -254,7 +262,7 @@ def convert_to_heatmap(data,column,shape,polygon_number):
 
     return np.reshape(heatmap_data,shape)
 
-def multi_plot(input_data,elements,output,robust,range,cmap,interpolation_method):
+def multi_plot(input_data,elements,output,robust,max,cmap,interpolation_method):
     import matplotlib as mpl
     import matplotlib.pyplot as plt
     mpl.rc('text', usetex=True)
@@ -262,22 +270,23 @@ def multi_plot(input_data,elements,output,robust,range,cmap,interpolation_method
     mpl.rcParams['xtick.direction'] = 'in'
     mpl.rcParams['ytick.direction'] = 'in'
     from mpl_toolkits.axes_grid1 import make_axes_locatable
-    elements.insert(0,'Scr')
+    elements.insert(0,'Total')
     nplots=len(elements)
-    extent=[0,data['Freq'].max(), data['Scr'].min(),data['Scr'].max()]
+    extent=[0,data['Freq'].max(), data['Total'].min(),data['Total'].max()]
     fig, axs = plt.subplots(nrows=nplots, ncols=1,sharex=True, figsize=[6.4,4.8*nplots], squeeze=True)#,
                             #subplot_kw={'xticks': xticks} )#, 'yticks': [], 'yticklabels':[]                              })
     plt.subplots_adjust(hspace =0.0)
     if robust=='True':
-        Scr=convert_to_heatmap(data,column='Scr',shape=[len(gridx)-1,len(gridy[0])-1],polygon_number=(len(gridx)-1)*(len(gridy[0])-1))
+        Scr=convert_to_heatmap(data,column='Total',shape=[len(gridx)-1,len(gridy[0])-1],polygon_number=(len(gridx)-1)*(len(gridy[0])-1))
         max=Scr.max()
         min=Scr.min()
     if robust=='False':
-        min=range[0]
-        max=range[1]
+        min=0
+        max=max[0]
     for ax, j in zip(axs.flat, elements):
-        print('Creating {} heatmap'.format(j))
+        print(f'Creating {j} heatmap')
         matrix=convert_to_heatmap(data,column=j,shape=[len(gridx)-1,len(gridy[0])-1],polygon_number=(len(gridx)-1)*(len(gridy[0])-1))
+        print(f'The maximum density in {j} is %.2f \n' % matrix.max())
         im=ax.imshow(matrix,extent=extent, rasterized=True, interpolation=interpolation_method,
                      cmap=cmap,origin='lower',aspect='auto',vmin=min,vmax=max)
         ax.set_yticks([])
@@ -286,14 +295,14 @@ def multi_plot(input_data,elements,output,robust,range,cmap,interpolation_method
         ax2.tick_params(axis='y',which='minor',length=3)
         ax.tick_params(axis='x',labelsize=14,length=6,width=1)
         ax2.tick_params(axis='y',which='both',width=1)
-        ax2.plot(data['Freq'],data['Scr'],'rx',alpha=0)
+        ax2.plot(data['Freq'],data['Total'],'rx',alpha=0)
         ax2.set_yscale('log')
         ax2.yaxis.set_ticks_position('left')
         ax.set_ylabel(r'$\Gamma_{tot}$ $\big($ ps$^{-1}\big)$',labelpad=35,fontsize=18)
-        if j=='Scr':
-            ax2.text((data['Freq'].max()*0.85),data['Scr'].max()*0.5,str('Total'),fontsize=18)
+        if j=='Total':
+            ax2.text((data['Freq'].max()*0.85),data['Total'].max()*0.5,str('Total'),fontsize=18)
         else:
-            ax2.text((data['Freq'].max()*0.9),data['Scr'].max()*0.5,str(j),fontsize=18)
+            ax2.text((data['Freq'].max()*0.9),data['Total'].max()*0.5,str(j),fontsize=18)
     ax.set_xlabel('Frequency (THz)',fontsize=18)
     left, bottom, width, height = ax.get_position().bounds
     cax = fig.add_axes([left, 0.075, width, height * 0.05])
@@ -303,7 +312,7 @@ def multi_plot(input_data,elements,output,robust,range,cmap,interpolation_method
     cbar.set_label('Weight',fontsize=18)
     plt.savefig('{}.pdf'.format(output),bbox_inches='tight', pad_inches=0.2)
 
-def single_plot(input_data,elements,robust,range,cmap,interpolation_method):
+def single_plot(input_data,elements,robust,max,cmap,interpolation_method):
     import matplotlib as mpl
     import matplotlib.pyplot as plt
     mpl.rc('text', usetex=True)
@@ -312,16 +321,16 @@ def single_plot(input_data,elements,robust,range,cmap,interpolation_method):
     mpl.rcParams['ytick.direction'] = 'in'
     from mpl_toolkits.axes_grid1 import make_axes_locatable
     compount_name=''.join(elements)
-    elements.insert(0,'Scr')
+    elements.insert(0,'Total')
     print(compount_name)
-    extent=[0,data['Freq'].max(), data['Scr'].min(),data['Scr'].max()]
+    extent=[0,data['Freq'].max(), data['Total'].min(),data['Total'].max()]
     if robust=='True':
-        Scr=convert_to_heatmap(data,column='Scr',shape=[len(gridx)-1,len(gridy[0])-1],polygon_number=(len(gridx)-1)*(len(gridy[0])-1))
+        Scr=convert_to_heatmap(data,column='Total',shape=[len(gridx)-1,len(gridy[0])-1],polygon_number=(len(gridx)-1)*(len(gridy[0])-1))
         max=Scr.max()
         min=Scr.min()
     if robust=='False':
-        min=range[0]
-        max=range[1]
+        min=0
+        max=max[0]
     for i in elements:
         print('Creating {} heatmap'.format(i))
         fig,ax=plt.subplots(figsize=[6.4,4.8])
@@ -333,7 +342,7 @@ def single_plot(input_data,elements,robust,range,cmap,interpolation_method):
         ax2.tick_params(axis='y',which='minor',length=3)
         ax.tick_params(axis='x',labelsize=14,length=6,width=1)
         ax2.tick_params(axis='y',which='both',width=1)
-        ax2.plot(data['Freq'],data['Scr'],'rx',alpha=0)
+        ax2.plot(data['Freq'],data['Total'],'rx',alpha=0)
         ax2.set_yscale('log')
         ax2.yaxis.set_ticks_position('left')
         ax.set_ylabel(r'$\Gamma_{tot}$ $\big($ ps$^{-1}\big)$',labelpad=35,fontsize=18)
@@ -342,8 +351,6 @@ def single_plot(input_data,elements,robust,range,cmap,interpolation_method):
         #ticks=np.linspace(min, max, nticks, endpoint=True)
         cbar=plt.colorbar(im,ax=ax)
         cbar.set_label('Weight',fontsize=18)
-        if i=='Scr':
-            i='Total'
         plt.savefig('{}_{}.pdf'.format(compount_name,i),bbox_inches='tight', pad_inches=0.2)
 
 
@@ -352,8 +359,6 @@ parser.add_argument('-m', '--mode',         nargs='?', help=f'Modes: \n \t w: wr
                     choices={"r", "w"},             default='w')
 parser.add_argument('-p', '--plot_mode', nargs='?', help='Plotting mode, m for one single plot, s for one plot for each element and n for no plot',
                     choices={'m','s', 'n'}, default='m')
-parser.add_argument('--supercell_size',     nargs='+',      help='Supercell size, default size is [1, 1, 1  ]',
-                    type=int    ,required=False,    default=[1,1,1])
 parser.add_argument('--mesh_grid',          nargs='+',      help='Phonopy mesh grid size, default mesh is [1, 1, 1  ]',
                     type=int    ,required=False,    default=[1,1,1])
 parser.add_argument('--output_yaml',        nargs='?',        help='Output file name with the scattering rates, partitipation rates and atomic partitipation rates',
@@ -364,8 +369,8 @@ parser.add_argument('--heatmap_xy',         nargs='+',        help='Heatmap x,y 
                     type=int    , required=False,    default=[5,5])
 parser.add_argument("--robust", nargs='?', type=str,
                         default='True', help='If true heatmap range is fixed to  the extreme values')
-parser.add_argument('--heatmap_range', type=int, nargs='+', default=[0,1000], required=False,
-                    help='Heatmap colorbar minimum and maximum')
+parser.add_argument('--heatmap_max', type=int, nargs='+', default=[1000], required=False,
+                    help='Heatmap colorbar maximum')
 parser.add_argument("--cmap", nargs='?', type=str,
                         default='Blues', help='Heatmap colormap, colormaps from Matplotlib')
 parser.add_argument("--interpolation_method", nargs='?', type=str,
@@ -375,10 +380,11 @@ parser.add_argument("--interpolation_method", nargs='?', type=str,
 args=parser.parse_args()
 
 if args.mode=='w':
-    generate_yaml(supercell_size=args.supercell_size, mesh_grid=args.mesh_grid)
+    generate_yaml(mesh_grid=args.mesh_grid)
     mesh_data,atom_types,mass=read_raw_data(input_data='mesh.yaml')
     match_qpoints=find_qpoints(mesh_data)
     write_results(data=mesh_data, atom_types=atom_types, mass=mass,match_qp=match_qpoints,output_file=args.output_yaml)
+
 if args.mode=='r':
     data,element_list=convert_to_dataframe(input_file=args.output_yaml)
     data=clean_data(data)
@@ -389,12 +395,12 @@ if args.mode=='r':
 
     if args.plot_mode=='s':
         print('Single plot mode')
-        single_plot(data,elements=element_list,robust=args.robust,range=args.heatmap_range,cmap=args.cmap,
+        single_plot(data,elements=element_list,robust=args.robust,max=args.heatmap_max,cmap=args.cmap,
                     interpolation_method=args.interpolation_method)
     if args.plot_mode=='m':
         print('Multiplot mode')
         multi_plot(data,elements=element_list,output=args.multiplot_name,robust=args.robust,
-                    range=args.heatmap_range,cmap=args.cmap, interpolation_method=args.interpolation_method)
+                    max=args.heatmap_max,cmap=args.cmap, interpolation_method=args.interpolation_method)
     if args.plot_mode=='n':
         print('No plot mode')
         data.to_csv('raw_data',sep='\t')
