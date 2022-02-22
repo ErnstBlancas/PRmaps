@@ -22,7 +22,7 @@ python main.py -m w --mesh_grid 12 12 12 --output_yaml BiOCuS_results
 The .yaml file with the results could be read with the mode read `m -r`. With this mode, different plots could be produced. 
  - The different modes could be selected with `-p [m, s or n]`
  - The input file is specified with `--output_yaml name`
- - The size of the heatmap is defined with `--heatmap_xy x y`.
+ - The number of bins used to divide the space and calculate the heatmap is defined with `--heatmap_xy x y`.
  - The range of the colorbar could be set with:
    - `--robust True` the range is fixed according to the maximum and the minimum
    - `--robust False` in this case the range must be specified with `--heatmap_range min max`
