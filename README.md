@@ -14,7 +14,7 @@ The eigenvectors generated with Phonopy are used to obtain the participation rat
 
 For example to create a [5, 5, 3] supercell with a [12, 12, 12] mesh grid, and save the results in `BiOCuSe_results.yaml` the code is:
 ```
-python main.py -m w --supercell_size 5 5 3 --mesh_grid 12 12 12 --output_yaml BiOCuS_results
+python main.py -m w --mesh_grid 12 12 12 --output_yaml BiOCuS_results
 ```
 
 
