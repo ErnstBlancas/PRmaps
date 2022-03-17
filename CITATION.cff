@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software in your work, please cite it as below."
+authors:
+  - family-names: Blancas
+    given-names: Ernesto J.
+  - family-names: Plata
+    given-names: Jose J.
+  - family-names: Marquez
+    given-names: Antonio M.
+  - family-names: Fdez Sanz
+    given-names: Javier
+title: "Scattering rates heat map plotter"
+version: 1.0.0
+doi: xxxxxxxxxxx
+date-released: 2022-03-11
+repository-code: "https://github.com/ErnstBlancas/PRmaps"
