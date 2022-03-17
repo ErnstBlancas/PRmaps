@@ -53,6 +53,5 @@ With the no plot mode `-p n` the data used for the plots is saved as `raw_data`.
 ```
 python main.py -m r -p n --output_yaml BiOCuS_results --heatmap_xy 15 15
 ```
-explicar datos que se produce?
 
 
